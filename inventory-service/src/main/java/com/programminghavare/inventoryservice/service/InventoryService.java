@@ -1,5 +1,6 @@
 package com.programminghavare.inventoryservice.service;
 
+import com.programminghavare.inventoryservice.dto.InventoryResponse;
 import com.programminghavare.inventoryservice.model.Inventory;
 import com.programminghavare.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,13 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
 
     @Transactional(readOnly = true)
-    public List<Inventory> isInStock(List<String> skuCode) {
-        return inventoryRepository.findBySkuCodeIn(Collections.singletonList(skuCode.toString()));
+    public List<InventoryResponse> isInStock(List<String> skuCode) {
+        return inventoryRepository.findBySkuCodeIn(skuCode).stream()
+                .map(inventory ->
+                        InventoryResponse.builder()
+                                .skuCode(inventory.getSkuCode())
+                                .isInStock(inventory.getQuantity() > 0)
+                                .build()
+                ).toList();
     }
 }
